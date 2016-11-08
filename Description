@@ -1,0 +1,15 @@
+Welcome to the peeMarksmanship wiki!
+
+Project description:
+
+Bullseye for toilets that measures one's aim while peeing. 
+It's intended for public restrooms (think bar, pub). 
+The user would try to aim for the center of the bullseye (that would be in the toilet) while taking a leek. 
+Once the user flushes the toilet the score is printed out.
+
+The bullseye has three different levels, each one related to a different score (5,10,20). 
+The circles are not concentric. At the bottom of each level there is a sensor that measures the volume of liquid/time. T
+he score is based of the amount of liquid that pases though each sensor.
+
+There is a button connected to the chain (button you push to flush the toilet) 
+that when you push it prints out your final score on the display and resets the score.
