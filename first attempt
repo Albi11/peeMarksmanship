@@ -1,0 +1,73 @@
+int score = 0;  //this value changes thoughout the loop adding the value detected by the different sensors each time. 
+int sensorA;    //this is the first sensor, B is the second etc...
+int sensorB;
+int sensorC;
+const int button = 2;   //the button would be the toilet's chain
+int chain;
+
+    void setup() {
+pinMode(button,INPUT);
+Serial.begin(9600);
+}
+
+    void loop() {
+  
+sensorA = analogRead (A0);            //it reads the value of the first sensor and gives you a value between 0-1023
+sensorA = map(sensorA,0,1023,0,10);   //which it then scales to a value from 0 to 10
+
+//Serial.println("SENSOR A: ");       // to make sure it was reading the value of the sensor correctly we printed it out
+//Serial.println(sensorA);
+
+if (sensorA > 0){                     //if this value is above 0
+  score = sensorA*20;                 // it signs the valur of sensorA times 20 to the variable score
+  //Serial.println("Score + A: ");     
+  //Serial.println(score);            // to make sure it was calculating the value correctly we printed it out
+}else{
+  //Serial.println("NO SENSOR A");
+}
+//delay(5);
+
+
+sensorB = analogRead (A1);            //same for b
+sensorB = map(sensorB,0,1023,0,10);
+
+//Serial.println("SENSOR B: ");
+//Serial.println(sensorB);
+
+if (sensorB > 0){
+  score = score + sensorB*10;
+  //Serial.println("Score + A + B: ");
+  //Serial.println(score);
+}else{
+  //Serial.println("NO SENSOR B");
+}
+//delay(5);
+
+
+sensorC = analogRead (A2);              //and c
+sensorC = map(sensorC,0,1023,0,10);
+
+//Serial.println("SENSOR C: ");
+//Serial.println(sensorC);
+
+if (sensorC > 0){
+  score = score + sensorC*5;
+  //Serial.println("Score + A + B + C: ");
+  //Serial.println(score);
+}else{
+  //Serial.println("NO SENSOR C");
+}
+                                          //up until here the code worked fine
+//delay(5);
+
+chain = digitalRead(button);          //here we introduced the button, figuring the chain 
+//Serial.println(chain);              //here we were just checking it worked - which it didn't
+                                      //because it would onlu read the state of the button once, and then not again
+                                      //as if it wasn't in a loop...
+if(chain == LOW){                     //and here if the button had been read correctly if should print the score if pressed
+    Serial.println(score);            
+    score = 0;                        //and reset the variable to 0
+}
+
+
+//delay(5000);
