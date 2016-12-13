@@ -1,0 +1,128 @@
+
+// This is missing all the stuff that DOES have to do with twitter because it has all our credentials on it.
+
+
+
+
+
+//stuff that doesn't have to do with twitter:
+
+// include the library code:
+#include <LiquidCrystal.h>
+
+// initialize the library with the numbers of the interface pins
+LiquidCrystal lcd(12, 11, 5, 4, 3, 2);
+int counter = 0;
+int lastscore = 0;
+int score = 0;
+int highscore = 0;
+int sensors[3];                 //this array has three positions, one for each sensor
+const int button = 7;
+int chain;
+
+
+// this function runs the whole creating a tweet mess and we have taken it out of the code
+void sendTweet(String tweetText){
+    
+    TembooChoreo StatusesUpdateChoreo;
+    // invoke the Temboo client
+    // NOTE that the client must be reinvoked, and repopulated with
+    // appropriate arguments, each time its run() method is called.
+    StatusesUpdateChoreo.begin();
+    
+    // set Temboo account credentials
+    StatusesUpdateChoreo.setAccountName(TEMBOO_ACCOUNT);
+    StatusesUpdateChoreo.setAppKeyName(TEMBOO_APP_KEY_NAME);
+    StatusesUpdateChoreo.setAppKey(TEMBOO_APP_KEY);
+
+    // identify the Temboo Library choreo to run (Twitter > Tweets > StatusesUpdate)
+    StatusesUpdateChoreo.setChoreo("/Library/Twitter/Tweets/StatusesUpdate");
+
+    // set the required choreo inputs
+    // see https://www.temboo.com/library/Library/Twitter/Tweets/StatusesUpdate/ 
+    // for complete details about the inputs for this Choreo
+ 
+    // add the Twitter account information
+    StatusesUpdateChoreo.addInput("AccessToken", TWITTER_ACCESS_TOKEN);
+    StatusesUpdateChoreo.addInput("AccessTokenSecret", TWITTER_ACCESS_TOKEN_SECRET);
+    StatusesUpdateChoreo.addInput("ConsumerKey", TWITTER_API_KEY);    
+    StatusesUpdateChoreo.addInput("ConsumerSecret", TWITTER_API_SECRET);
+     // and the tweet we want to send
+    StatusesUpdateChoreo.addInput("StatusUpdate", tweetText);
+
+    // tell the Process to run and wait for the results. The 
+    // return code (returnCode) will tell us whether the Temboo client 
+    // was able to send our request to the Temboo servers
+    unsigned int returnCode = StatusesUpdateChoreo.run();
+
+    // a return code of zero (0) means everything worked
+    if (returnCode == 0) {
+        Serial.println("Success! Tweet sent!");
+    } else {
+      // a non-zero return code means there was an error
+      // read and print the error message
+      while (StatusesUpdateChoreo.available()) {
+        char c = StatusesUpdateChoreo.read();
+        Serial.print(c);
+      }
+    } 
+    StatusesUpdateChoreo.close() 
+}
+
+void setup() {
+ 
+  lcd.begin(16, 2);
+  pinMode(button, INPUT_PULLUP);
+  Serial.begin(9600);
+  delay(4000);
+  Bridge.begin();
+}
+
+void loop() {
+ 
+    sensors[0] = map(analogRead(A0), 0, 1023, 0, 10);       //the first position in the array is for the first sensor
+    score =  sensors[0] * 20;                               //we map it out and the value it gives times 20 is the new value for score
+
+    sensors[1] = map(analogRead (A1), 0, 1023, 0, 10);
+    score = score + sensors[1] * 10;
+
+    sensors[2] = map(analogRead (A2), 0, 1023, 0, 10);
+    score = score + sensors[2] * 5;
+
+
+    chain = digitalRead(button);                            // it only gives you the value of the score if the chain is pulled
+
+    if (chain == LOW) {
+      counter = 0;
+      lcd.clear();
+      lcd.print(score);                                    //it prints the value on the lcd screen
+      
+      if(highscore<score){                                //remembers the highest score, is score is higher than highscore this one is updated
+        
+        highscore = score;
+        Serial.println("Running SendATweet");             //if there's a new highscore it sends a tweet (function above)
+  
+         // define the text of the tweet we want to send
+        String tweetText("There's a new highscore: " + String(highscore)); 
+        sendTweet(tweetText);
+      }
+      delay(1000);
+  
+    }
+    //Every five seconds it changes the screen from current score to highscore 
+    if (score==lastscore){
+      counter+=1;
+      
+      if (counter>=50) {
+        lcd.clear();
+        lcd.print("highscore: ");
+        lcd.print(highscore);
+      }
+      
+    }
+    lastscore=score;
+    delay(100);
+
+  
+  
+  }  
